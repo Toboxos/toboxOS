@@ -1,6 +1,8 @@
 org 0x7C00
 bits 16
 
+mov [driveNumber], dl ; Save the number of current drive
+
 ; Bootable Code will be located from 0x7C00 - 0x7E00 (512 bytes)
 ; Set Stack base to 7E00
 mov ax, 0x7E0
@@ -19,6 +21,19 @@ add sp, 2
 push msg
 call print
 add sp, 2
+
+; Buffer for reading from disk
+mov ax, 0x9E0
+mov es, ax
+mov bx, 0x00
+
+mov ah, 0x02 		  ; read from disk
+mov al, 0x01 		  ; read 1 sector
+mov ch, 0x00 		  ; track number 0
+mov cl, 0x02 		  ; sector number 2
+mov dh, 0x00 		  ; head number 0
+mov dl, [driveNumber] ; use saved drive number
+int 0x13			  ; BIOS disk interrupt	
 
 ; Stop execution and halt machine
 cli
@@ -80,7 +95,14 @@ print_end:
     pop bp
     ret
 
+driveNumber: db 0x00
 msg: db "Hello World booted and written in Assembler"
 
 times 510-($-$$) db 0
 dw 0xAA55
+
+; 512 bytes (one Sector). For memory test after disk read
+times 128 db 0x41
+times 128 db 0x42
+times 128 db 0x43
+times 128 db 0x44
