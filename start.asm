@@ -57,45 +57,7 @@ cli
 hlt
 
 %include "screen.asm"
-
-status_a20:
-	push bp
-	mov bp, sp
-	pusha
-	push ds
-	push es
-	
-	xor eax, eax	; set eax 0x00
-	mov ds, eax
-	not eax			; set eax 0xffff
-	mov es, eax
-
-	mov si, 0x7dff
-	mov di, 0x7e0f
-
-	; when a20 line is not enabled [es:di] = [ds:si]
-	; write a value to [es:di]
-	; write value to [ds:si]
-	; when a20 line is not enabled [es:di] should be overwritten
-	mov byte [es:di], 0x00
-	mov byte [ds:si], 0xFF	
-	cmp byte [es:di], 0xFF
-	
-	pop es
-	pop ds
-	popa
-
-	; set a to 0
-	; when [es:di] = [ds:si] than jump to end
-	; else set a to 1 (a20 ist enabled)
-	mov ax, 0x00
-	jz status_a20_end
-	mov ax, 0x01
-status_a20_end:
-	mov sp, bp
-	pop bp
-	ret
-
+%include "a20.asm"
 
 
 driveNumber: db 0x00
@@ -103,6 +65,17 @@ msg: db `Hello World booted and written in Assembler\r\n\0`
 
 s_a20_off: db `A20 Line is off\r\n\0`
 s_a20_on: db `A20 Line ist on\r\n\0`
+
+; offset to partition table
+times 446-($-$$) db 0
+
+; partition 1 (bootable)
+db 0x80
+db 0x01, 0x01, 0x00
+db 0x01
+db 0x01, 0x02, 0x00
+dd 0x00
+dd 0x02
 
 times 510-($-$$) db 0
 dw 0xAA55
