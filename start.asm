@@ -1,6 +1,7 @@
-org 0x7C00
-bits 16
+[org 0x7C00]
+[bits 16]
 
+	cli
 	mov [driveNumber], dl ; Save the number of current drive
 
 	; Bootable Code will be located from 0x7C00 - 0x7E00 (512 bytes)
@@ -35,15 +36,24 @@ bits 16
 	mov dl, [driveNumber] ; use saved drive number
 	int 0x13			  ; BIOS disk interrupt	
 
-
+_boot_a20_check:
 	call status_a20
 	cmp ax, 0
 	jz _boot_a20_off
 
+_boot_a20_on:
 	push s_a20_on
 	call print
 	add sp, 0x02
-	jmp _boot_a20_end
+
+	xor ax, ax
+	mov ds, ax
+	lgdt [gdt]
+	
+	mov eax, cr0
+	or eax, 0x01
+	mov cr0, eax
+	jmp 0x08:protected_mode
 
 _boot_a20_off:
 	push s_a20_off
@@ -53,18 +63,26 @@ _boot_a20_off:
 _boot_a20_end:
 
 ; Stop execution and halt machine
-cli
 hlt
 
 %include "screen.asm"
 %include "a20.asm"
 
+[bits 32]
+protected_mode:
+	mov eax, 0xdeadbeef
+	mov ebx, 0xc0debabe
+	hlt
 
+
+[bits 16]
 driveNumber: db 0x00
 msg: db `Hello World booted and written in Assembler\r\n\0`
 
 s_a20_off: db `A20 Line is off\r\n\0`
 s_a20_on: db `A20 Line ist on\r\n\0`
+
+%include "gdt.asm"
 
 ; offset to partition table
 times 446-($-$$) db 0
