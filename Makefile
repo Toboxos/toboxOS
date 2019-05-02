@@ -1,5 +1,5 @@
 ASM=nasm
 
-boot: start.S
+boot: start.asm
 	$(ASM) -f bin $< -o $@
 
