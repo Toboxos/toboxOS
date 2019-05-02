@@ -1,2 +1,5 @@
 http://joebergeron.io/posts/post_two.html
 for the Hello World tutorial
+
+http://osdever.net/tutorials/view/the-world-of-protected-mode
+for the tutorial how to get into protected mode
