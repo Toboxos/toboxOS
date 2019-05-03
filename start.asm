@@ -1,6 +1,5 @@
 [org 0x7C00]
 [bits 16]
-
 	cli
 	mov [driveNumber], dl ; Save the number of current drive
 
@@ -70,10 +69,18 @@ hlt
 
 [bits 32]
 protected_mode:
-	mov eax, 0xdeadbeef
-	mov ebx, 0xc0debabe
-	hlt
+	; segment registers for data
+	mov eax, 0x10
+	mov ds, eax
+	mov es, eax
+	mov ss, eax
+	mov fs, eax
+	
+	; segment register for graphic buffer
+	mov eax, 0x18
+	mov gs, eax	
 
+	hlt
 
 [bits 16]
 driveNumber: db 0x00
@@ -82,6 +89,7 @@ msg: db `Hello World booted and written in Assembler\r\n\0`
 s_a20_off: db `A20 Line is off\r\n\0`
 s_a20_on: db `A20 Line ist on\r\n\0`
 
+
 %include "gdt.asm"
 
 ; offset to partition table
@@ -89,9 +97,9 @@ times 446-($-$$) db 0
 
 ; partition 1 (bootable)
 db 0x80
-db 0x01, 0x01, 0x00
+db 0x00, 0x01, 0x00
 db 0x01
-db 0x01, 0x02, 0x00
+db 0x00, 0x02, 0x00
 dd 0x00
 dd 0x02
 

@@ -1,2 +1,4 @@
 qemu/
+bochs/
 boot
+*.swp

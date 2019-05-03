@@ -25,4 +25,13 @@ gdt_data:
 	db 10010010b
 	db 11001111b
 	db 0x00
+
+; GDT video segment
+gdt_video:
+	dw 0x2580
+	dw 0x8000
+	db 0x0B
+	db 10010010b
+	db 11000000b
+	db 0x00
 gdt_end:
