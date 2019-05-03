@@ -15,6 +15,12 @@ status_a20:
 	mov si, 0x7dff
 	mov di, 0x7e0f
 
+	; save value from before
+	mov byte al, [es:di]
+	mov bl, al
+	mov byte al, [ds:si]
+	mov cl, al
+
 	; when a20 line is not enabled [es:di] = [ds:si]
 	; write a value to [es:di]
 	; write value to [ds:si]
@@ -22,6 +28,12 @@ status_a20:
 	mov byte [es:di], 0x00
 	mov byte [ds:si], 0xFF	
 	cmp byte [es:di], 0xFF
+
+	; restore values
+	mov al, bl
+	mov byte [es:di], al
+	mov al, cl
+	mov byte [ds:si], al
 	
 	pop es
 	pop ds
