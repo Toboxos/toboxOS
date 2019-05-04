@@ -75,11 +75,12 @@ protected_mode:
 	mov es, eax
 	mov ss, eax
 	mov fs, eax
-	
-	; segment register for graphic buffer
-	mov eax, 0x18
-	mov gs, eax	
+	mov gs, eax
 
+	; Stack will be 1mb big from 0x100000 to 0x1FFFFF
+	mov esp, 0x1FFFFF
+
+	; Jump to kernel here
 	hlt
 
 [bits 16]
