@@ -2,3 +2,4 @@ qemu/
 bochs/
 boot
 *.swp
+*.bin

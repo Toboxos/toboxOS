@@ -22,15 +22,6 @@
 	call print
 	add sp, 2
 
-	; Read from disk to memory - first test
-	push 0x02 ; sector 2
-	push 0x00 ; head 0
-	push 0x00 ; cylinder 0
-	push 0x01 ; read 1 sector 
-	call _boot_read_disk
-	add sp, 0x04
-
-
 _boot_a20_check:
 	call status_a20
 	cmp ax, 0
@@ -41,14 +32,23 @@ _boot_a20_on:
 	call print
 	add sp, 0x02
 
-	xor ax, ax
-	mov ds, ax
-	lgdt [gdt]
+	; Loading code of loader.asm into memory at 0x7e00
+	mov ax, 0x7e0
+	mov es, ax
+	mov bx, 0x00
 	
-	mov eax, cr0
-	or eax, 0x01
-	mov cr0, eax
-	jmp 0x08:protected_mode
+	push 0x02 
+	push 0x00
+	push 0x00
+	push 0x01
+	call _boot_read_disk
+	add sp, 0x08
+
+	push s_jump_loader
+	call print
+	add sp, 0x02
+
+	jmp load_kernel
 
 _boot_a20_off:
 	push s_a20_off
@@ -59,6 +59,7 @@ _boot_a20_end:
 	cli
 	hlt
  
+; writes data to address pointed by bs:bx
 ; arg1 = number of sectors to read
 ; arg2 = cylinder number
 ; arg3 = head number
@@ -68,11 +69,6 @@ _boot_read_disk:
 	mov bp, sp
 	pusha  
 
-	; Disk content will be read to address 0x9E00
-	mov ax, 0x9E0
-	mov es, ax
-	mov bx, 0x00
-	
 	mov byte al, [bp+0x04]
 	mov byte ch, [bp+0x06]
 	mov byte dh, [bp+0x08]
@@ -87,27 +83,8 @@ _boot_read_disk:
 	pop bp
 	ret 
 
-; Stop execution and halt machine
-hlt
-
-%include "screen.asm"
-%include "a20.asm"
-
-[bits 32]
-protected_mode:
-	; segment registers for data
-	mov eax, 0x10
-	mov ds, eax
-	mov es, eax
-	mov ss, eax
-	mov fs, eax
-	mov gs, eax
-
-	; Stack will be 1mb big from 0x100000 to 0x1FFFFF
-	mov esp, 0x1FFFFF
-
-	; Jump to kernel here
-	hlt
+%include "bootloader/screen.asm"
+%include "bootloader/a20.asm"
 
 [bits 16]
 driveNumber: db 0x00
@@ -115,9 +92,9 @@ msg: db `Hello World booted and written in Assembler\r\n\0`
 
 s_a20_off: db `A20 Line is off\r\n\0`
 s_a20_on: db `A20 Line ist on\r\n\0`
+s_jump_loader: db `Jumping to kernel loader...\r\n\0`
 
-
-%include "gdt.asm"
+%include "bootloader/gdt.asm"
 
 ; offset to partition table
 times 446-($-$$) db 0
@@ -133,8 +110,4 @@ dd 0x02
 times 510-($-$$) db 0
 dw 0xAA55
 
-; 512 bytes (one Sector). For memory test after disk read
-times 128 db 0x41
-times 128 db 0x42
-times 128 db 0x43
-times 128 db 0x44
+%include "bootloader/loader.asm"
