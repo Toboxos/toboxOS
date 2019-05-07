@@ -22,18 +22,14 @@
 	call print
 	add sp, 2
 
-	; Buffer for reading from disk
-	mov ax, 0x9E0
-	mov es, ax
-	mov bx, 0x00
+	; Read from disk to memory - first test
+	push 0x02 ; sector 2
+	push 0x00 ; head 0
+	push 0x00 ; cylinder 0
+	push 0x01 ; read 1 sector 
+	call _boot_read_disk
+	add sp, 0x04
 
-	mov ah, 0x02 		  ; read from disk
-	mov al, 0x01 		  ; read 1 sector
-	mov ch, 0x00 		  ; track number 0
-	mov cl, 0x02 		  ; sector number 2
-	mov dh, 0x00 		  ; head number 0
-	mov dl, [driveNumber] ; use saved drive number
-	int 0x13			  ; BIOS disk interrupt	
 
 _boot_a20_check:
 	call status_a20
@@ -60,6 +56,36 @@ _boot_a20_off:
 	add sp, 0x02
 
 _boot_a20_end:
+	cli
+	hlt
+ 
+; arg1 = number of sectors to read
+; arg2 = cylinder number
+; arg3 = head number
+; arg4 = sector number
+_boot_read_disk:
+	push bp
+	mov bp, sp
+	pusha  
+
+	; Disk content will be read to address 0x9E00
+	mov ax, 0x9E0
+	mov es, ax
+	mov bx, 0x00
+	
+	mov byte al, [bp+0x04]
+	mov byte ch, [bp+0x06]
+	mov byte dh, [bp+0x08]
+	mov byte cl, [bp+0x0a]
+	mov byte dl, [driveNumber]
+
+	mov ah, 0x02 ; read from disk
+	int 0x13
+
+	popa
+	mov sp, bp
+	pop bp
+	ret 
 
 ; Stop execution and halt machine
 hlt
