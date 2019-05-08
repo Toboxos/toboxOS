@@ -13,6 +13,12 @@ load_kernel:
 	call _boot_read_disk
 	add sp, 0x08
 
+	; copy entry point to memory
+	mov word ax, [es:0x18]
+	mov word [kernel_entry], ax
+	mov word ax, [es:0x1A]
+	mov word [kernel_entry+2], ax
+
 	; Get the start of the programm header table
 	; only the lower 2 bytes are used, saved in bx
 	mov word ax, [es:0x1C]
@@ -62,7 +68,7 @@ load_kernel:
 ; Following code is only for 32bit !!!
 ; it depends on the values and offset in the elf header for 32 bit
 ; for 64 bit change the offsets
-[bits 32] ; breakpoint 0x7e50
+[bits 32] ; breakpoint 0x7e5e
 
 	; ebx = base offset of program header entry
 	; ecx = number of entries left to check
@@ -161,7 +167,8 @@ less_512:
 
 
 _loader_finished:
-	hlt
+	mov dword eax, [kernel_entry]
+	jmp eax
 	
 
 ; arg1 = source
@@ -308,6 +315,8 @@ s_test: db `test\r\n\0`
 addr_return: dd 0
 sp_rm: dw 0
 sp_pm: dd 0x1FFFFF
+
+kernel_entry: dd 0x00 ; Entry point of kernel is saved here and jumped to later
 
 ; Padding with zeros, so kernel code is aligend on sector 3
 times 1024-($-$$ ) db 0
