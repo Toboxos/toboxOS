@@ -64,22 +64,34 @@ load_kernel:
 ; for 64 bit change the offsets
 [bits 32] ; breakpoint 0x7e50
 
-	; ebx = base offset of program header entry from image start point
+	; ebx = base offset of program header entry
 	; ecx = number of entries left to check
 	and ebx, 0xFFFF ; ensure the upper half is zero
 	and ecx, 0xFFFF
 	add ebx, 0xa000 ; add image base to offset
 
+check_entry:
+
+	; if no more entrie left to check, loader has finished
+	cmp ecx, 0
+	je _loader_finished
+
 	; check if program entry is loadable
-	mov eax, [ebx]
-	cmp eax, 0x01
-	jne next_entry
+	; else check next entry
+	cmp dword [ebx], 0x01
+	je _loader_load_entry
+	
+	; move ebx to next entry, decrement remaining
+	add ebx, 0x200
+	dec ecx
+	jp check_entry
+
+_loader_load_entry:
 
 	; esi = offset on disk
 	add ebx, 0x04
 	mov esi, [ebx]
-	add esi, 0x400 ; because kernel image starts at sector 3
-	
+	add esi, 0x400 ; because kernel image starts at sector 3	
 
 	; edi = address in memory to load
 	add ebx, 0x04
@@ -88,6 +100,8 @@ load_kernel:
 	; edx = size of image
 	add ebx, 0x08
 	mov edx, [ebx]
+
+	add ebx, 0x10 ; mov ebx to next programm header
 
 	push ebx
 	push ecx
@@ -99,10 +113,14 @@ load_kernel:
 	mov ecx, 0x200
 	div ecx	
 
+	pop edx
+
 	; esi = sector to load
 	mov esi, eax
 	add esi, 0x01 ; sector numbering starts at 1
-	
+
+; loop for loading sectors
+_loader_next_sector:	
 	pushad
 	call go_real
 [bits 16]
@@ -112,11 +130,37 @@ load_kernel:
 [bits 32]
 	popad
 
+	cmp edx, 0x200
+	jc less_512
+
+; copy 512 bytes
 	push 0x200
 	push edi
 	push 0xb000
 	call memcpy
 	add esp, 0x0C
+	
+	; ready for next sector
+	add esi, 0x200
+	sub edx, 0x200
+	inc esi
+	jmp _loader_next_sector 
+
+; edx contains value less than 512 -> copy remaining bytes
+less_512:
+	push edx
+	push edi
+	push 0xb000
+	call memcpy
+	add esp, 0x0C
+	
+	pop ecx
+	pop ebx
+	dec ecx
+	jmp check_entry
+
+
+_loader_finished:
 	hlt
 	
 
@@ -168,10 +212,7 @@ _loader_load_sector:
 	add sp, 0x08
 
 	ret
-	
 
-next_entry:	
-	
 	
 [bits 16]
 go_protected:
