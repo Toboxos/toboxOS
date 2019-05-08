@@ -3,3 +3,4 @@ bochs/
 boot
 *.swp
 *.bin
+*.o
