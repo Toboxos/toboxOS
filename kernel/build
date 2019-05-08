@@ -1,3 +1,0 @@
-#!/bin/sh
-gcc -m32 -Wall -c -fno-builtin -fno-plt -nostdinc -fno-stack-protector kernel_main.c -fno-pic 
-ld -m elf_i386 -T kernel.ld -o kernel  kernel_main.o
