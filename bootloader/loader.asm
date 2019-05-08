@@ -102,20 +102,59 @@ load_kernel:
 	; esi = sector to load
 	mov esi, eax
 	add esi, 0x01 ; sector numbering starts at 1
-
+	
+	pushad
 	call go_real
 [bits 16]
 	call _loader_load_sector
 	push 0x00 ; real call saves only 2 bytes. push 2 bytes for align with 32 bit address
 	call go_protected
 [bits 32]
+	popad
+
+	push 0x200
+	push edi
+	push 0xb000
+	call memcpy
+	add esp, 0x0C
 	hlt
+	
+
+; arg1 = source
+; arg2 = dest
+; arg3 = size
+memcpy:
+	push ebp
+	mov ebp, esp
+	pushad
+
+	mov esi, [ebp+0x08]
+	mov edi, [ebp+0x0C]
+	mov ecx, [ebp+0x10]
+
+memcpy_loop:
+	mov eax, ecx
+	cmp eax, 0x00
+	je memcpy_end
+
+	mov byte al, [esi]
+	mov byte [edi], al
+	
+	inc esi
+	inc edi
+	dec ecx
+	jmp memcpy_loop
+	
+memcpy_end:
+	popad
+	mov esp, ebp
+	pop ebp
+	ret
+
 	
 ; loads setor number in si to memory location 0xb000
 [bits 16]
 _loader_load_sector:
-	pusha
-
 	mov ax, 0xb00
 	mov es, ax
 	xor bx, bx
@@ -128,7 +167,6 @@ _loader_load_sector:
 	call _boot_read_disk
 	add sp, 0x08
 
-	popa
 	ret
 	
 
