@@ -35,9 +35,11 @@ static vga_text_entry* vga_data = (vga_text_entry*) 0xB8000;
 static const int vga_width = 80;
 static const int vga_height = 24;
 
-extern void printc(uint8_t x, uint8_t y, char c);
-extern void printc_color(uint8_t x, uint8_t y, char c, uint8_t colorForeground, uint8_t colorBackground, uint8_t blink);
+extern void printc(char c);
+extern void printc_color(char c, uint8_t colorForeground, uint8_t colorBackground, uint8_t blink);
+extern void printhex(uint32_t value);
 
+extern void setCursor(int x, int y);
 extern void clearscreen();
 
 #endif

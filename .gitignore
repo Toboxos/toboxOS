@@ -4,3 +4,5 @@ boot
 *.swp
 *.bin
 *.o
+*.co
+*.asmo
