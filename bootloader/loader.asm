@@ -147,7 +147,7 @@ _loader_next_sector:
 	add esp, 0x0C
 	
 	; ready for next sector
-	add esi, 0x200
+	add edi, 0x200
 	sub edx, 0x200
 	inc esi
 	jmp _loader_next_sector 
