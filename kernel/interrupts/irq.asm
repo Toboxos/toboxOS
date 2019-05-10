@@ -19,9 +19,12 @@ global irq13_entry
 global irq14_entry
 global irq15_entry
 
+extern irq_standard
+extern irq01
+
 standard_isr_entry:
 	pushad
-
+	call irq_standard
 	popad
 	iret
 
@@ -35,6 +38,9 @@ irq00_entry:
 irq01_entry:
 	pushad
 
+	in al, 0x60
+
+	call irq01
 	popad
 	iret
 

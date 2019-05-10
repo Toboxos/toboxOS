@@ -8,6 +8,7 @@ load_idt:
 	pushad
 
 	lidt [idtr]
+	sti
 
 	popad
 	mov esp, ebp
