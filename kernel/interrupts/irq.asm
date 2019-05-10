@@ -19,18 +19,26 @@ global irq13_entry
 global irq14_entry
 global irq15_entry
 
-extern irq_standard
-extern irq01
+extern irq_handler
 
 standard_isr_entry:
 	pushad
-	call irq_standard
+
+	push 0xFF ; some number which not getting handled. dummy
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
-
+; each irq entry pushes the irq number on stack and calling the irq handler
+; the irq handle can check the number and proceed in c
 irq00_entry:
 	pushad
+
+	push 0x00
+	call irq_handler
+	pop eax
 
 	popad
 	iret
@@ -38,14 +46,19 @@ irq00_entry:
 irq01_entry:
 	pushad
 
-	in al, 0x60
+	push 0x01
+	call irq_handler
+	pop eax
 
-	call irq01
 	popad
 	iret
 
 irq02_entry:
 	pushad
+
+	push 0x02
+	call irq_handler
+	pop eax
 
 	popad
 	iret
@@ -53,11 +66,19 @@ irq02_entry:
 irq03_entry:
 	pushad
 
+	push 0x03
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
 irq04_entry:
 	pushad
+
+	push 0x04
+	call irq_handler
+	pop eax
 
 	popad
 	iret
@@ -65,11 +86,19 @@ irq04_entry:
 irq05_entry:
 	pushad
 
+	push 0x05
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
 irq06_entry:
 	pushad
+
+	push 0x06
+	call irq_handler
+	pop eax
 
 	popad
 	iret
@@ -77,11 +106,19 @@ irq06_entry:
 irq07_entry:
 	pushad
 
+	push 0x07
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
 irq08_entry:
 	pushad
+
+	push 0x08
+	call irq_handler
+	pop eax
 
 	popad
 	iret
@@ -89,11 +126,19 @@ irq08_entry:
 irq09_entry:
 	pushad
 
+	push 0x09
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
 irq10_entry:
 	pushad
+
+	push 0x10
+	call irq_handler
+	pop eax
 
 	popad
 	iret
@@ -101,11 +146,19 @@ irq10_entry:
 irq11_entry:
 	pushad
 
+	push 0x11
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
 irq12_entry:
 	pushad
+
+	push 0x12
+	call irq_handler
+	pop eax
 
 	popad
 	iret
@@ -113,17 +166,29 @@ irq12_entry:
 irq13_entry:
 	pushad
 
+	push 0x13
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
 irq14_entry:
 	pushad
 
+	push 0x14
+	call irq_handler
+	pop eax
+
 	popad
 	iret
 
 irq15_entry:
 	pushad
+
+	push 0x15
+	call irq_handler
+	pop eax
 
 	popad
 	iret
