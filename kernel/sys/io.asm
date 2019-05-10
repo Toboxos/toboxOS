@@ -14,7 +14,7 @@ outb:
 ; reads 1 byte from given port
 ; arg1 = port 16 bits
 inb:
-	mov word dx, [esp+0x84] ; arg 1 in dx
+	mov word dx, [esp+0x04] ; arg 1 in dx
 	xor eax, eax
 	in al, dx
 	ret
