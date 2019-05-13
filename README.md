@@ -1,8 +1,8 @@
 # toboxOS
-This is a simple operating system for learning purposes. My goal is to learn more about the x86 architecture and operating system 
-development.
+This is a simple operating system for learning purposes. 
 
-My goal is to write a fully functional bootloader which loads the kernel into memory and give execution to that.
+My goal is to learn more about the x86 architecture and operating system 
+development. That means, I want to write a fully functional bootloader which loads the kernel into memory and give execution to that.
 The kernel than should setup an basic environment with interrupt handling.
 From there the kernel should be very modular for testing and learning different ways of operating system functionality.
 
