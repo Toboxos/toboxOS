@@ -14,7 +14,7 @@ KERNEL_OBJS+=$(subst .asm,.asmo,$(KERNEL_ASM_SRCS))
 
 .PHONY: bootloader kernel
 
-os: bootloader kernel
+boot: bootloader kernel
 	cat bootloader.bin kernel.bin > boot
 
 bootloader: bootloader/boot.asm bootloader/gdt.asm
