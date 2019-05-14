@@ -1,5 +1,7 @@
 bits 16
 
+; this functions tests if the a20 line is enabled or disabled
+; the result is returned in ax. 1 = enabled, 0 = disabled
 status_a20:
 	push bp
 	mov bp, sp
@@ -13,7 +15,7 @@ status_a20:
 	mov es, eax
 
 	mov si, 0x7dff
-	mov di, 0x7e0f
+	mov di, 0x7e0f	; 0xffff + 0x7e0f = 0x7dff -> same address if a20 is disabled
 
 	; save value from before
 	mov byte al, [es:di]
@@ -45,6 +47,7 @@ status_a20:
 	mov ax, 0x00
 	jz status_a20_end
 	mov ax, 0x01
+
 status_a20_end:
 	mov sp, bp
 	pop bp

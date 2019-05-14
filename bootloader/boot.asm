@@ -14,16 +14,21 @@
 
 	call clearscreen
 
+	; set cursor to position row = 0, col = 0
 	push 0x00
 	call setcursor
 	add sp, 2
 
+	; print assembler hello wolrd
 	push msg
 	call print
 	add sp, 2
 
+
 _boot_a20_check:
 	call status_a20
+	
+	; if a20 is disabled jump
 	cmp ax, 0
 	jz _boot_a20_off
 
@@ -44,10 +49,12 @@ _boot_a20_on:
 	call _boot_read_disk
 	add sp, 0x08
 
+	; print message
 	push s_jump_loader
 	call print
 	add sp, 0x02
 
+	; jump to code located in loader.asm
 	jmp load_kernel
 
 _boot_a20_off:
@@ -60,6 +67,7 @@ _boot_a20_end:
 	hlt
  
 ; writes data to address pointed by bs:bx
+;
 ; arg1 = number of sectors to read
 ; arg2 = cylinder number
 ; arg3 = head number
@@ -99,6 +107,7 @@ s_jump_loader: db `Jumping to kernel loader...\r\n\0`
 ; offset to partition table
 times 446-($-$$) db 0
 
+; partition table (see Wikipedia)
 ; partition 1 (bootable)
 db 0x80
 db 0x00, 0x01, 0x00
