@@ -1,5 +1,5 @@
 #include "screen.h"
-
+#include "../sys/mem.h"
 
 /*
  * Representation of one entry in the vga video buffer
@@ -26,13 +26,29 @@ void printc(char c) {
 	printc_color(c, VGA_COLOR_WHITE, VGA_COLOR_BLACK, 0);
 }
 
+/**
+ * Scrolls the whole screen one row up
+ */
+void scrollUp() {
+	
+	/* For each row from 0 to last - 1: copy the memory of row after to current row */
+	for(int i = 0; i < VGA_HEIGHT - 1; ++i ) {
+		memcpy( &vga_data[i * VGA_WIDTH], &vga_data[(i+1) * VGA_WIDTH], VGA_WIDTH * 2 );
+	}
+	
+	/* Clear last row */
+	memset( &vga_data[(VGA_HEIGHT - 1) * VGA_WIDTH], 0x00, VGA_WIDTH * 2 );	
+
+	--cursor.y;
+}
+
 void printc_color(char c, uint8_t colorForeground, uint8_t colorBackground, uint8_t blink) {
 	
 	/* New Line */
 	if( c == '\n' ) {
 		/* Implement scrolling later */
 		if( ++cursor.y >= VGA_HEIGHT ) {
-
+			scrollUp();
 		}
 		return;
 	}	
@@ -54,8 +70,8 @@ void printc_color(char c, uint8_t colorForeground, uint8_t colorBackground, uint
 		cursor.x = 0;		
 
 		/* Implement scrolling later */
-		if( ++cursor.y > VGA_HEIGHT ) {
-
+		if( ++cursor.y >= VGA_HEIGHT ) {
+			scrollUp();
 		}
 	}
 }
