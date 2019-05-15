@@ -3,15 +3,7 @@
 
 #include "../types.h"
 
-typedef struct {
-	uint8_t character;
-	struct {
-		uint8_t colorForeground : 4;
-		uint8_t colorBackground : 3;
-		uint8_t blink			: 1;
-	} attribute;
-} vga_text_entry;
-
+/** VGA Colors */
 enum {
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE,
@@ -31,15 +23,52 @@ enum {
 	VGA_COLOR_WHITE
 };
 
-static vga_text_entry* vga_data = (vga_text_entry*) 0xB8000;
-static const int vga_width = 80;
-static const int vga_height = 24;
+static const int VGA_WIDTH = 80;
+static const int VGA_HEIGHT = 24;
 
+/** 
+ * Prints character to current cursor position
+ *
+ * @param	c	character to print
+ */
 extern void printc(char c);
+
+/**
+ * Prints colored character to current cursor position
+ *
+ * @param	c					character to print
+ * @param	colorForeground		foreground color see, VGA Colors
+ * @param	colorBackground		background color but only 3 bits from VGA_COLOR_BLACK - VGA_COLOR_GRAY, see VGA Colors
+ * @param	blink				if character should blink
+ */
 extern void printc_color(char c, uint8_t colorForeground, uint8_t colorBackground, uint8_t blink);
+
+/**
+ * Prints hexadecimal value
+ *
+ * @param	value	32bit value which gets printed as hex
+ */
 extern void printhex(uint32_t value);
 
-extern void setCursor(int x, int y);
-extern void clearscreen();
+
+/**
+ * Prints string to current cursor position
+ *
+ * @param	string	pointer to string
+ */
+extern void prints(const char* string);
+
+/**
+ * Moves Cursor to given position at screen
+ *
+ * @param 	y	row on screen. Start at 0
+ * @param	x	column on screen. Start at 0
+ */
+extern void setCursor(uint8_t y, uint8_t x);
+
+/**
+ * Clears the whole Screen
+ */
+extern void clearScreen();
 
 #endif
