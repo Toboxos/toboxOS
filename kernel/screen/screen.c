@@ -1,5 +1,6 @@
 #include "screen.h"
 #include "../sys/mem.h"
+#include "../sys/io.h"
 
 /*
  * Representation of one entry in the vga video buffer
@@ -18,8 +19,8 @@ static vga_text_entry* vga_data = (vga_text_entry*) 0xB8000;
 
 /** Holds current cursor position */
 struct {
-	uint8_t x;	/** Current y-Position */
-	uint8_t y;	/** Current x-Position */
+	int8_t x;	/** Current y-Position */
+	int8_t y;	/** Current x-Position */
 } cursor = {0};
 
 void printc(char c) {
@@ -29,7 +30,7 @@ void printc(char c) {
 /**
  * Scrolls the whole screen one row up
  */
-void scrollUp() {
+void scroll_up() {
 	
 	/* For each row from 0 to last - 1: copy the memory of row after to current row */
 	for(int i = 0; i < VGA_HEIGHT - 1; ++i ) {
@@ -42,22 +43,72 @@ void scrollUp() {
 	--cursor.y;
 }
 
+/**
+ * Update cursor position on screen to current cursor position
+ */
+void update_cursor() {
+    uint16_t pos = cursor.y * VGA_WIDTH + cursor.x;
+    outb(0xE9, '*');
+
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, pos & 0xFF);
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (pos >> 8) & 0xFF);
+}
+
+void set_cursor(uint8_t y, uint8_t x) {
+
+	/* Bound check for cursor */
+	if( y >= VGA_HEIGHT || x >= VGA_WIDTH ) return;
+
+	cursor.x = x;
+	cursor.y = y;
+}
+
 void printc_color(char c, uint8_t colorForeground, uint8_t colorBackground, uint8_t blink) {
 	
 	/* New Line */
 	if( c == '\n' ) {
 		/* Implement scrolling later */
 		if( ++cursor.y >= VGA_HEIGHT ) {
-			scrollUp();
+			scroll_up();
 		}
+
+        update_cursor();
+
 		return;
 	}	
 
 	/* Carriage Return */
 	if( c == '\r' ) {
 		cursor.x = 0;
+
+        update_cursor();
+
 		return;
 	}
+
+    /* Backspace */
+    if( c == '\b' ) {
+
+        /* Go one line up */
+        if( --cursor.x < 0 ) {
+            cursor.x = VGA_WIDTH - 1;
+
+            /* Cursor would out of screen at top */
+            if( --cursor.y < 0 ) {
+                cursor.y = 0;
+                cursor.x = 0;
+            }
+        };
+
+        /* Delete chracter */
+        vga_data[cursor.y * VGA_WIDTH + cursor.x].character = 0x00;
+        
+        update_cursor();
+
+        return;
+    }
 
 	/* Sets the attribute of the appropiate entry */
 	vga_data[cursor.y * VGA_WIDTH + cursor.x].character = c;
@@ -71,11 +122,12 @@ void printc_color(char c, uint8_t colorForeground, uint8_t colorBackground, uint
 
 		/* Implement scrolling later */
 		if( ++cursor.y >= VGA_HEIGHT ) {
-			scrollUp();
+			scroll_up();
 		}
 	}
-}
 
+    update_cursor();
+}
 
 void printhex(uint32_t value) {
 
@@ -106,19 +158,10 @@ void prints(const char* string) {
 }
 
 
-void setCursor(uint8_t y, uint8_t x) {
-
-	/* Bound check for cursor */
-	if( y >= VGA_HEIGHT || x >= VGA_WIDTH ) return;
-
-	cursor.x = x;
-	cursor.y = y;
-}
-
 /**
  * @details	Writes to each byte in VGA text memory 0x00
  */
-void clearScreen() {
+void clear_screen() {
 	char* base = (char*) vga_data;
 	for( int i = 0; i < VGA_WIDTH * VGA_HEIGHT * 2; ++i ) {
 		base[i] = 0;

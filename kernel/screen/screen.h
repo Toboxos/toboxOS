@@ -64,11 +64,11 @@ extern void prints(const char* string);
  * @param 	y	row on screen. Start at 0
  * @param	x	column on screen. Start at 0
  */
-extern void setCursor(uint8_t y, uint8_t x);
+extern void set_cursor(uint8_t y, uint8_t x);
 
 /**
  * Clears the whole Screen
  */
-extern void clearScreen();
+extern void clear_screen();
 
 #endif

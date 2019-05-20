@@ -56,44 +56,6 @@ extern void irq15_entry();
 extern void load_idt(); /** Extern function in assembler loads the IDT */
 
 /**
- * Setup everything for interrupt handling
- */
-void setup_interrupts() {
-
-	/* Sets the idtr */
-	idtr.limit = (256 * 8) - 1;
-	idtr.ptr = idt;
-	
-	/* Send the exceptions interrupts to default_isr_entry (later they will have their own exception entries) */
-	for( int i = 0; i < 32; ++i ) {
-		setEntry(i, default_isr_entry, 0x08, 0x0E, 0x00);
-	}
-
-	/* 
-	 * Set the irq entries
-	 * Kernel code selector 0x08, Type Interrupt Gate 0x0E, Privilege Ring 0
-     */
-	setEntry(IRQ00, irq00_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ01, irq01_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ02, irq02_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ03, irq03_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ04, irq04_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ05, irq05_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ06, irq06_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ07, irq07_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ08, irq08_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ09, irq09_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ10, irq10_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ11, irq11_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ12, irq12_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ13, irq13_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ14, irq14_entry, 0x08, 0x0E, 0x00);
-	setEntry(IRQ15, irq15_entry, 0x08, 0x0E, 0x00);	
-
-	load_idt();
-}
-
-/**
  * set the entry in the IDT to the given values
  *
  * @param	index		index of interrupt in table
@@ -112,6 +74,45 @@ void setEntry(uint8_t index, uint32_t offset, uint16_t selector, uint8_t type, u
 	idt[index].reserved = 0x00;	
 	idt[index].zero = 0x00;
 	idt[index].present = 0x01;
+}
+
+
+/**
+ * Setup everything for interrupt handling
+ */
+void setup_interrupts() {
+
+	/* Sets the idtr */
+	idtr.limit = (256 * 8) - 1;
+	idtr.ptr = (uint32_t) idt;
+	
+	/* Send the exceptions interrupts to default_isr_entry (later they will have their own exception entries) */
+	for( int i = 0; i < 32; ++i ) {
+		setEntry(i, (uint32_t) default_isr_entry, 0x08, 0x0E, 0x00);
+	}
+
+	/* 
+	 * Set the irq entries
+	 * Kernel code selector 0x08, Type Interrupt Gate 0x0E, Privilege Ring 0
+     */
+	setEntry(IRQ00, (uint32_t) irq00_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ01, (uint32_t) irq01_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ02, (uint32_t) irq02_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ03, (uint32_t) irq03_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ04, (uint32_t) irq04_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ05, (uint32_t) irq05_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ06, (uint32_t) irq06_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ07, (uint32_t) irq07_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ08, (uint32_t) irq08_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ09, (uint32_t) irq09_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ10, (uint32_t) irq10_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ11, (uint32_t) irq11_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ12, (uint32_t) irq12_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ13, (uint32_t) irq13_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ14, (uint32_t) irq14_entry, 0x08, 0x0E, 0x00);
+	setEntry(IRQ15, (uint32_t) irq15_entry, 0x08, 0x0E, 0x00);	
+
+	load_idt();
 }
 
 

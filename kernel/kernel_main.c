@@ -1,33 +1,23 @@
 #include "screen/screen.h"
 #include "interrupts/interrupts.h"
+#include "keyboard/keyboard.h"
 #include "sys/io.h"
+#include "sys/mem.h"
 
 const char* text = "Dieser Text ist Philipp gewidmet";
 
-void test(interrupt_status status) {
-	uint8_t scancode = inb(0x60);
-	
-	setCursor(5, 0);
-	printc(' ');
-	printc(' ');
-	printc(' ');
-	printc(' ');
-	setCursor(5, 0);
-	printhex( scancode );
-}
-
 void kernel_main() {
-	
-	clearScreen();
-	setCursor(0, 0);
-
-	prints(text);
-	
-	setCursor(1, 0);
-	printhex((uint32_t) kernel_main);
-
 	setup_interrupts();
-	register_isr(IRQ01, test);
+	setup_keyboard();
 
-	while( 1 );
+	clear_screen();
+	set_cursor(0, 0);
+	prints(text);
+
+	while( 1 ) {
+		prints("\n\r>>>");
+		const char* t = input();
+		prints("\rYou typed: ");
+		prints(t);
+	}
 }
