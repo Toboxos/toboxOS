@@ -48,7 +48,6 @@ void scroll_up() {
  */
 void update_cursor() {
     uint16_t pos = cursor.y * VGA_WIDTH + cursor.x;
-    outb(0xE9, '*');
 
     outb(0x3D4, 0x0F);
     outb(0x3D5, pos & 0xFF);
@@ -159,11 +158,14 @@ void prints(const char* string) {
 
 
 /**
- * @details	Writes to each byte in VGA text memory 0x00
+ * @details	Filles the whole screen with spaces white on black
  */
 void clear_screen() {
 	char* base = (char*) vga_data;
-	for( int i = 0; i < VGA_WIDTH * VGA_HEIGHT * 2; ++i ) {
-		base[i] = 0;
-	}
+	for( int i = 0; i < VGA_WIDTH * VGA_HEIGHT; ++i ) {
+		vga_data[i].character = 0x00;
+	    vga_data[i].attribute.colorForeground = VGA_COLOR_WHITE;
+        vga_data[i].attribute.colorBackground = VGA_COLOR_BLACK;
+        vga_data[i].attribute.blink = 0;
+    }
 }
