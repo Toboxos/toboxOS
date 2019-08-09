@@ -10,6 +10,7 @@
 
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "lua.h"
 
@@ -189,11 +190,10 @@ LUALIB_API char *(luaL_buffinitsize) (lua_State *L, luaL_Buffer *B, size_t sz);
 #define LUA_FILEHANDLE          "FILE*"
 
 
-// !TODO!
-// typedef struct luaL_Stream {
-//   FILE *f;  /* stream (NULL for incompletely created streams) */
-//   lua_CFunction closef;  /* to close stream (NULL for closed streams) */
-// } luaL_Stream;
+typedef struct luaL_Stream {
+  FILE *f;  /* stream (NULL for incompletely created streams) */
+  lua_CFunction closef;  /* to close stream (NULL for closed streams) */
+} luaL_Stream;
 
 /* }====================================================== */
 
@@ -229,10 +229,10 @@ LUALIB_API void (luaL_openlib) (lua_State *L, const char *libname,
 #endif
 
 /* print an error message */
-// #if !defined(lua_writestringerror)
-// #define lua_writestringerror(s,p) 
-//         (fprintf(stderr, (s), (p)), fflush(stderr))
-// #endif
+#if !defined(lua_writestringerror)
+#define lua_writestringerror(s,p) \
+        (fprintf(stderr, (s), (p)), fflush(stderr))
+#endif
 
 /* }================================================================== */
 

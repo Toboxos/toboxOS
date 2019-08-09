@@ -51,14 +51,6 @@
 struct lua_longjmp;  /* defined in ldo.c */
 
 
-/*
-** Atomic type (relative to signals) to better ensure that 'lua_sethook'
-** is thread safe
-*/
-#if !defined(l_signalT)
-#include <signal.h>
-#define l_signalT	sig_atomic_t
-#endif
 
 
 /* extra stack space to handle TM calls and some other extras */
@@ -197,7 +189,6 @@ struct lua_State {
   int hookcount;
   unsigned short nny;  /* number of non-yieldable calls in stack */
   unsigned short nCcalls;  /* number of nested C calls */
-  l_signalT hookmask;
   lu_byte allowhook;
 };
 

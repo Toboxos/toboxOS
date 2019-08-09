@@ -8,9 +8,8 @@
 #ifndef luaconf_h
 #define luaconf_h
 
+#include <limits.h>
 #include <stddef.h>
-#include <stdarg.h>
-
 
 
 /*
@@ -43,6 +42,26 @@
 ** or Windows-specific features on Windows.
 */
 /* #define LUA_USE_C89 */
+
+
+#if defined(LUA_USE_WINDOWS)
+#define LUA_DL_DLL	/* enable support for DLL */
+#define LUA_USE_C89	/* broadly, Windows is C89 */
+#endif
+
+
+#if defined(LUA_USE_LINUX)
+#define LUA_USE_POSIX
+#define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
+#define LUA_USE_READLINE	/* needs some extra libraries */
+#endif
+
+
+#if defined(LUA_USE_MACOSX)
+#define LUA_USE_POSIX
+#define LUA_USE_DLOPEN		/* MacOS does not need -ldl */
+#define LUA_USE_READLINE	/* needs an extra library: -lreadline */
+#endif
 
 
 /*
@@ -636,6 +655,7 @@
 
 #if !defined(LUA_USE_C89) && defined(__STDC_VERSION__) && \
     __STDC_VERSION__ >= 199901L
+#include <stdint.h>
 #if defined(INTPTR_MAX)  /* even in C99 this type is optional */
 #undef LUA_KCONTEXT
 #define LUA_KCONTEXT	intptr_t

@@ -10,21 +10,27 @@
 #include <lua/lauxlib.h>
 
 const char* text = "Dieser Text ist Philipp gewidmet";
+const char* text2 = "Dieser Text ist Philipp gewidmet";
 
 void kernel_main() {
-	setup_interrupts();
-	setup_keyboard();
-
-
 	clear_screen();
 	set_cursor(0, 0);
-	if( strcmp(text, "Dieser Text ist Philipp gewidmet") ) {
+
+	if( strcmp(text, text2) == 0 ) {
 		prints("TEST\n");
 	}
 	prints(text);
 
-	//lua_State* L;
-	//L = luaL_newstate();
+
+	setup_interrupts();
+	setup_keyboard();
+
+
+	
+	
+
+	// lua_State* L;
+	// L = luaL_newstate();
 
 	while( 1 ) {
 		prints("\n\r>>>");

@@ -1,8 +1,9 @@
 qemu/
 bochs/
-boot
+boot.img
 *.swp
 *.bin
 *.o
 *.co
 *.asmo
+*.a

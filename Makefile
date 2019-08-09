@@ -14,15 +14,15 @@ KERNEL_ASM_SRCS=$(shell find ./kernel -name "*.asm")
 KERNEL_OBJS=$(subst .c,.co,$(KERNEL_C_SRCS))
 KERNEL_OBJS+=$(subst .asm,.asmo,$(KERNEL_ASM_SRCS))
 
-.PHONY: bootloader kernel
+.PHONY: bootloader kernel libc lua clean
 
-boot: bootloader kernel
+boot: libc lua bootloader kernel
 	cat bootloader.bin kernel.bin > boot.img
 
 bootloader: bootloader/boot.asm bootloader/gdt.asm
 	$(ASM) -f bin $< -o bootloader.bin
 
-kernel: $(KERNEL_OBJS) static/libc.a
+kernel: $(KERNEL_OBJS) static/libc.a static/lua.a 
 	$(LD) $(LFLAGS) $^ -o kernel.bin
 	
 
@@ -32,9 +32,10 @@ LIBC_OBJS=$(subst .c,.co,$(LIBC_SRCS))
 libc: $(LIBC_OBJS)
 	ar rcs static/libc.a $^
 
-LUA_OBJS=lua/lauxlib.co
+LUA_SRCS=$(shell find ./lua -name "*.c")
+LUA_OBJS=$(subst .c,.co,$(LUA_SRCS))
 lua: $(LUA_OBJS)
-	ar rcs lua/lua.a $^
+	ar rcs static/lua.a $^
 
 # Compiling Rules
 %.co: %.c
@@ -47,3 +48,4 @@ clean:
 	rm -f $(KERNEL_OBJS)
 	rm -f $(LIBC_OBJS)
 	rm -f $(LUA_OBJS)
+	rm -f static/*
